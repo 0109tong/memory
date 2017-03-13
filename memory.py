@@ -20,6 +20,7 @@ tile_val = 0
 tile_val_sec = 0
 first_pos = 0
 current_pos = 0
+tile_exist = True
 
 class Tile :
     def __init__ (self,cor,exp,num):
@@ -115,7 +116,6 @@ def create_tiles ():
         pos = random.choice(tile_pos)
         #gets a random number from tile_numlist
         num = random.choice(tile_numlist)
-        
         #creates a tile object in tiles dict
         tiles[i] = Tile(pos,False,num)
         tile_pos.remove(pos)
@@ -128,7 +128,6 @@ def reset ():
     tile_pos = []
     tiles = {}
 
-
 def draw (canvas):
     for i in tile_keylist:
         p = tiles[i].get_pointlist()
@@ -137,18 +136,19 @@ def draw (canvas):
             p = tiles[i].get_num_point()
             n = tiles[i].get_num()
             canvas.draw_text(str(n),p,10,'red')
-        
     canvas.draw_text(str(t),(WIDTH-10,HEIGHT-10),10,'white')
 
 def mouseclick (pos):
-    global tile_keylist,click,first_tile_i,second_tile_i,bool,tile_val,tile_val_sec,first_pos,current_pos
+    global tile_exist,tile_keylist,click,first_tile_i,second_tile_i,bool,tile_val,tile_val_sec,first_pos,current_pos
     tile_num = 0
     
     if click == 2:
-                tiles[second_tile_i].hide()
-                tiles[first_tile_i].hide()
-                click = 0
-                bool = True
+        if tile_exist is True:	
+            tiles[second_tile_i].hide()
+            tiles[first_tile_i].hide()
+        click = 0
+        tile_exist = True
+        bool = True
                 
     for i in tile_keylist:
         if tiles[i].in_range(pos) and click == 0 and bool is False:
@@ -158,7 +158,6 @@ def mouseclick (pos):
             first_pos = tiles[i].get_cor()
             first_tile_i = i
             tiles[i].expose()
-            print tile_val
         
         elif tiles[i].in_range(pos) and click == 1 :
             #second click
@@ -166,41 +165,32 @@ def mouseclick (pos):
             current_pos = tiles[i].get_cor()
             tile_val_sec = tiles[i].get_num()
             second_tile_i = i
-            print tile_val_sec
-            print tile_val
-            print first_pos
-            print current_pos
             if first_pos is not current_pos and tile_val == tile_val_sec :
                 tile_keylist.remove(i)
                 tile_keylist.remove(first_tile_i)
                 tiles.pop(i)
                 tiles.pop(first_tile_i)
                 click = 2
-                print 'done'
+                tile_exist = False
             elif first_pos is not current_pos:
                 click = 2      
+    
     bool = False
-
-
 
 def timer ():
     global t 
     t+=1
 
 def start ():
+    global t
+    t = 0
     reset()
     create_keylist()
     create_numlist()
     create_numlist_2()
     create_pos()
     create_tiles()
-
-
-
-
-
-
-
+    timer.start()
 
 frame = simplegui.create_frame('move ball',WIDTH, HEIGHT)
 frame.set_draw_handler(draw)
